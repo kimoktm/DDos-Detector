@@ -60,7 +60,7 @@ unban_ip()
 
 	while read line; do
 		echo "$IPT -D INPUT -s $line -j DROP" >> $UNBAN_SCRIPT
-		echo "echo 'Un-banned the following ip address $line on `date`'" >> $UNBAN_SCRIPT
+		echo "echo '-- Un-banned the following ip address $line on `date`'" >> $UNBAN_SCRIPT
 		echo "echo -e 'Un-banned the following ip address\t$line \ton `date`' >> $UNBANNED_LOG" >> $UNBAN_SCRIPT
 		echo $line >> $UNBAN_IP_LIST
 	done < $BANNED_IP_LIST
@@ -95,6 +95,7 @@ analyse_n_ban()
 			CURR_LINE_IP=$(echo $line | cut -d" " -f2)
 			
 			if [ $CURR_LINE_CONN -lt $NO_OF_CONNECTIONS ]; then
+				echo "-- No Attacks Detected"
 				break
 			fi
 			
@@ -105,7 +106,7 @@ analyse_n_ban()
 			
 			IP_BANNED=1
 			echo -e "Banned the following ip address\t$CURR_LINE_IP\t$CURR_LINE_CONN connections \ton `date`" >> $BANNED_LOG
-			echo "Banned the following ip address $CURR_LINE_IP with $CURR_LINE_CONN connections on `date`"
+			echo "-- Banned the following ip address $CURR_LINE_IP with $CURR_LINE_CONN connections on `date`"
 			echo "$CURR_LINE_IP with $CURR_LINE_CONN connections" >> $BANNED_IP_MAIL
 
 			echo $CURR_LINE_IP >> $BANNED_IP_LIST
@@ -117,7 +118,7 @@ analyse_n_ban()
 			dt=`date`
 			if [ $EMAIL_TO != "" ]; then
 				cat $BANNED_IP_MAIL | mail -s "DDos Detected on $dt" $EMAIL_TO
-				echo "An email is sent with the attack details to the admin"
+				echo "-- An email is sent with the attack details to the admin"
 			fi
 			unban_ip
 		fi
