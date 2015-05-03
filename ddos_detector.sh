@@ -3,12 +3,12 @@
 #################################
 #           Functions           #
 #################################
+
 head()
 {
-	echo
 	echo "DDoS-Detector (version 1.0)"
 	echo "Detect & Block DDoS Attacks"
-	echo "Handle TCP, UDP, ICMP Attacks"
+	echo "Handle TCP, UDP, HTTP Attacks"
 	echo
 }
 
@@ -26,6 +26,7 @@ ddos_cycle()
 {
 	analyse_n_ban
 	count_down $[FREQ*60]
+	echo "-----------------------"
 }
 
 load_config()
@@ -75,17 +76,14 @@ unban_ip()
 
 analyse_n_ban()
 {
-	echo
-	echo "Analysing connections"
+	echo "Analysing connections..."
 	BANNED_IP_MAIL='tmp/ddos_ip_mail'
 	BANNED_IP_LIST='tmp/ddos_ip_list'
 	CONNECTIONS_LIST='tmp/ddos_connections_list'
 	echo "Banned the following ip addresses on `date`" > $BANNED_IP_MAIL
 	echo >>	$BANNED_IP_MAIL
 	echo "" > $BANNED_IP_LIST
-	# netstat -atun | awk '{print $5}' | cut -d: -f1 | sed -e '/^$/d' |sort | uniq -c | sort -nr > $CONNECTIONS_LIST
 	netstat -ntu | awk '{print $5}' | cut -d: -f1 | sort | uniq -c | sort -nr > $CONNECTIONS_LIST
-	cat $CONNECTIONS_LIST
 
 	if [ $BAN_ACTIVE -eq 1 ]; then
 		IP_BANNED=0
@@ -95,7 +93,6 @@ analyse_n_ban()
 			CURR_LINE_IP=$(echo $line | cut -d" " -f2)
 			
 			if [ $CURR_LINE_CONN -lt $NO_OF_CONNECTIONS ]; then
-				echo "-- No Attacks Detected"
 				break
 			fi
 			
@@ -121,6 +118,8 @@ analyse_n_ban()
 				echo "-- An email is sent with the attack details to the admin"
 			fi
 			unban_ip
+		else
+			echo "-- No Attacks Detected"
 		fi
 	fi
 }
